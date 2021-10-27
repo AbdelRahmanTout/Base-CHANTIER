@@ -1,0 +1,98 @@
+package projet_i3306;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class Projet_i3306 {
+
+    public static void main(String[] args) throws SQLException {
+        String url = "jdbc:oracle:thin:@localhost:1521:XE";
+        String us = "SYSTEM";
+        String pass = "system";
+        Connection con = null;
+        try {
+
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            con = DriverManager.getConnection(url, us, pass);
+        } catch (ClassNotFoundException cnfex) {
+            System.err.println("Faild to load Driver");
+            System.exit(1);
+        } catch (SQLException sqle) {
+            System.err.println("Erreur lors de la connextion :" + sqle);
+        }
+        
+        String query1 = "select * from chantier_passagers  ";
+        String query2 = "Select * from chantier_conducteur";
+        String query3 = "Select * from chantier_conducteur_passager";
+        String query4 = "Select * from temps_employe ";
+
+        Statement stmt1 = con.createStatement();
+        Statement stmt2 = con.createStatement();
+        Statement stmt3 = con.createStatement();
+        Statement stmt4 = con.createStatement();
+
+        ResultSet rs1 = stmt1.executeQuery(query1);
+        ResultSet rs2 = stmt2.executeQuery(query2);
+        ResultSet rs3 = stmt3.executeQuery(query3);
+        ResultSet rs4 = stmt4.executeQuery(query4);
+
+        System.out.println("Tableau CHANTIER_PASSAGER ");
+        System.out.println("---------------------------");
+        while (rs1.next()) {
+            String chantier = rs1.getString(1);
+            String jour = rs1.getString(2);
+            String vehicule = rs1.getString(3);
+            String passager = rs1.getString(4);
+            String conducteur = rs1.getString(5);
+            float temps = rs1.getFloat(6);
+            System.out.println(chantier + " , " + jour + " , " + vehicule + " , " + passager + " , " + conducteur + " , " + temps);
+        }
+        stmt1.close();
+        System.out.println("----------------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------\n");
+
+        //Query2 for "chantier_conducteur" view
+        System.out.println("Tableau CHANTIER_CONDUCTEUR");
+        System.out.println("----------------------------");
+        while (rs2.next()) {
+            String Chn = rs2.getString(1);
+            String Conducteur1 = rs2.getString(2);
+            String jour1 = rs2.getString(3);
+            float temps1 = rs2.getFloat(4);
+            System.out.println(Chn + " , " + Conducteur1 + " , " + jour1 + " , " + temps1);
+        }
+        stmt2.close();
+        System.out.println("----------------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------\n");
+
+        //Query3 for "chantier_conducteur_passager" view
+        System.out.println("Tableau CHANTIER_CONDUCTEUR_PASSAGER");
+        System.out.println("-------------------------------------");
+        while (rs3.next()) {
+            String Chn1 = rs3.getString(1);
+            String Empl = rs3.getString(2);
+            String jour2 = rs3.getString(3);
+            float temps2 = rs3.getFloat(4);
+            System.out.println(Chn1 + " , " + Empl + " , " + jour2 + " , " + temps2);
+        }
+        System.out.println("----------------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------\n");
+
+        //Query4 for "Temps_employe" view 
+        System.out.println("Tableau TEMPS_EMPLOYE");
+        System.out.println("----------------------------");
+        while (rs4.next()) {
+            String Empl1 = rs4.getString(1);
+            Float temps3 = rs4.getFloat(2);
+            System.out.println(Empl1 + " , " + temps3);
+        }
+        stmt4.close();
+        System.out.println("----------------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------\n");
+
+    }
+
+}

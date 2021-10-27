@@ -1,0 +1,60 @@
+--Triggers
+--EX1 partie 1
+--Debut du trigger
+create or replace Trigger TrigpassagerConducteur 
+BEFORE insert on Transporter 
+for each row
+declare 
+n number ; 
+BEGIN 
+Select count(N_conducteur) into n from VISITE v , EMPLOYE e
+where (e.N_EMP =:new.N_Transporte and v.N_Conducteur = e.N_EMP)
+                                  and v.DATE_JOUR=:new.Date_jour;
+  
+    IF n > 0 THEN 
+      raise_application_error(-20201,'Le passager est un conducteur');
+    END IF;
+END;   
+DROP TRIGGER TrigpassagerConducteur ;
+--FIN du trigger
+--Test trigger 
+insert into TRANSPORTER values ('CH2','V2','01-APR-08','E1');
+
+--Views 
+--EX1 partie 2
+Create or Replace VIEW chantier_passagers (chantier,jour,vehicule,passager,conducteur,temps) AS
+SELECT t.N_CHANTIER,t.Date_jour,t.N_Vehicule,N_Transporte,N_Conducteur,Temps_Trajet from
+VISITE v , TRANSPORTER t
+WHERE v.N_chantier=t.N_CHANTIER 
+AND v.N_Vehicule=t.N_VEHICULE 
+AND v.DATE_JOUR=t.DATE_JOUR
+AND v.DATE_JOUR like '%APR-08';
+select * from chantier_passagers;
+drop view chantier_passagers;
+
+--EX1 partie 3
+Create or replace View chantier_conducteur (chantier,conducteur,jour,temps) AS 
+SELECT N_Chantier,N_Conducteur,Date_jour ,SUM(TEMPS_TRAJET) 
+from VISITE 
+WHERE  DATE_JOUR like '%APR-08'
+Group BY N_Chantier,N_CONDUCTEUR,Date_jour; 
+SELECT * from chantier_conducteur ;
+
+--EX1 partie 4
+create or replace View chantier_conducteur_passager(Chantier,Employe,Jour,Temps) AS 
+Select Chantier,Jour,Passager ,Sum(temps)
+From CHANTIER_PASSAGERS
+group BY chantier,jour,passager 
+Union 
+SELECT chantier,jour,conducteur,sum(temps)
+From CHANTIER_CONDUCTEUR
+group BY Chantier,Jour,CONDUCTEUR;
+select * from CHANTIER_CONDUCTEUR_Passager;
+
+--EX1 partie 5
+CREATE or REPLACE View temps_employe (employe,temps) AS 
+SELECT N_Emp ,SUM(TEMPS)  
+FROM EMPLOYE e ,chantier_passagers c
+WHERE c.CONDUCTEUR = e.N_EMP OR c.PASSAGER = e.N_EMP
+GROUP BY N_EMP;
+SELECT * from temps_employe;
